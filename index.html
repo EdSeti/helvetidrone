@@ -4,226 +4,173 @@
 <meta charset="UTF-8">
 <meta name="color-scheme" content="light dark">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1a1a2e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#1a1a2e">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.png">
+<meta name="apple-mobile-web-app-title" content="HelvetiDrone">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 /* ── Tokens: Light ── */
 :root {
+  --bg-app:        #f5f5f5;
   --bg-primary:    #ffffff;
-  --bg-secondary:  #f3f4f6;
-  --text-primary:  #111827;
-  --text-secondary:#4b5563;
-  --text-tertiary: #9ca3af;
-  --border:        #e5e7eb;
-  --btn-bg:        #f9fafb;
-  --btn-border:    #d1d5db;
-  --btn-text:      #111827;
-  /* status — light */
-  --go-bg:#e8f5e9; --go-border:#a5d6a7; --go-label:#2e7d32; --go-reason:#388e3c;
-  --caution-bg:#fff8e1; --caution-border:#ffe082; --caution-label:#e65100; --caution-reason:#ef6c00;
-  --nogo-bg:#ffebee; --nogo-border:#ef9a9a; --nogo-label:#c62828; --nogo-reason:#d32f2f;
-  --idle-bg:var(--bg-secondary); --idle-border:var(--border);
-  --idle-label:var(--text-secondary); --idle-reason:var(--text-tertiary);
+  --bg-secondary:  #f7f7f7;
+  --text-primary:  #1a1a2e;
+  --text-secondary:#666;
+  --text-tertiary: #aaa;
+  --border:        #e0e0e0;
+  --border-light:  #eee;
+  --input-bg:      #fff;
+  --input-border:  #ddd;
+  /* status */
+  --go-bg:#e8f5e9;      --go-border:#a5d6a7;  --go-label:#2e7d32;  --go-reason:#388e3c;
+  --ca-bg:#fff8e1;      --ca-border:#ffe082;  --ca-label:#e65100;  --ca-reason:#ef6c00;
+  --no-bg:#ffebee;      --no-border:#ef9a9a;  --no-label:#c62828;  --no-reason:#d32f2f;
+  --idle-bg:#f0f0f0;    --idle-border:#ddd;   --idle-label:#aaa;   --idle-reason:#aaa;
+  /* zone panel */
+  --zp-bg:#fff;         --zp-border:#ef9a9a;
+  --zp-name:#c62828;    --zp-reason:#555;     --zp-desc:#444;      --zp-close:#aaa;
   --clear-color:#2e7d32;
+  /* poly */
+  --poly-stroke:#c62828; --poly-fill:#ef9a9a;
 }
 
 /* ── Tokens: Dark ── */
 [data-theme="dark"] {
-  --bg-primary:    #0f172a;
-  --bg-secondary:  #1e293b;
+  --bg-app:        #0f172a;
+  --bg-primary:    #1e293b;
+  --bg-secondary:  #0f172a;
   --text-primary:  #e2e8f0;
   --text-secondary:#94a3b8;
   --text-tertiary: #64748b;
   --border:        #334155;
-  --btn-bg:        #1e293b;
-  --btn-border:    #334155;
-  --btn-text:      #e2e8f0;
-  /* status — dark */
-  --go-bg:#052e16; --go-border:#166534; --go-label:#4ade80; --go-reason:#86efac;
-  --caution-bg:#2d1b00; --caution-border:#92400e; --caution-label:#fbbf24; --caution-reason:#fcd34d;
-  --nogo-bg:#3b0f0f; --nogo-border:#991b1b; --nogo-label:#f87171; --nogo-reason:#fca5a5;
-  --idle-bg:var(--bg-secondary); --idle-border:var(--border);
-  --idle-label:var(--text-secondary); --idle-reason:var(--text-tertiary);
+  --border-light:  #1e293b;
+  --input-bg:      #0f172a;
+  --input-border:  #334155;
+  /* status */
+  --go-bg:#052e16;      --go-border:#166534;  --go-label:#4ade80;  --go-reason:#86efac;
+  --ca-bg:#2d1b00;      --ca-border:#92400e;  --ca-label:#fbbf24;  --ca-reason:#fcd34d;
+  --no-bg:#3b0f0f;      --no-border:#991b1b;  --no-label:#f87171;  --no-reason:#fca5a5;
+  --idle-bg:#1e293b;    --idle-border:#334155; --idle-label:#475569; --idle-reason:#475569;
+  /* zone panel */
+  --zp-bg:#1e293b;      --zp-border:#991b1b;
+  --zp-name:#f87171;    --zp-reason:#94a3b8;  --zp-desc:#cbd5e1;   --zp-close:#64748b;
   --clear-color:#4ade80;
+  --poly-stroke:#f87171; --poly-fill:#7f1d1d;
 }
 
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── App shell ── */
-body { background: var(--bg-secondary); transition: background .25s; }
+body { background: var(--bg-app); transition: background .25s; }
+
 .app {
-  font-family: system-ui, -apple-system, sans-serif;
-  color: var(--text-primary);
-  background: var(--bg-secondary);
+  font-family: -apple-system, system-ui, sans-serif;
   padding: 1rem;
   max-width: 420px;
   margin: 0 auto;
   min-height: 100vh;
-  transition: background .25s, color .25s;
+  color: var(--text-primary);
 }
 
 /* ── Header ── */
-.header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
-.header-icon {
-  width: 36px; height: 36px;
-  background: #1a1a2e;
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
+.header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-top: .5rem; }
+.header-icon { width: 36px; height: 36px; background: #1a1a2e; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .header-text { flex: 1; }
-.header-text h1 { font-size: 18px; font-weight: 500; color: var(--text-primary); }
+.header-text h1 { font-size: 18px; font-weight: 600; color: var(--text-primary); }
 .header-text p  { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
-
-/* Dark mode toggle */
 .theme-btn {
-  flex-shrink: 0;
-  width: 36px; height: 36px;
-  border-radius: 8px;
-  border: 0.5px solid var(--border);
-  background: var(--bg-primary);
-  color: var(--text-secondary);
-  font-size: 18px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: background .2s, border-color .2s;
+  flex-shrink: 0; width: 36px; height: 36px;
+  border-radius: 8px; border: 0.5px solid var(--border);
+  background: var(--bg-primary); color: var(--text-secondary);
+  font-size: 18px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background .2s;
 }
-.theme-btn:hover { background: var(--bg-secondary); }
 
 /* ── Map ── */
-#map {
-  height: 190px;
-  border-radius: 12px;
+#map { height: 190px; border-radius: 12px; margin-bottom: 0; overflow: hidden; border: 0.5px solid var(--input-border); }
+
+/* ── Zone panel ── */
+#zone-panel {
+  display: none;
+  background: var(--zp-bg);
+  border: 1px solid var(--zp-border); border-top: none;
+  border-radius: 0 0 12px 12px;
+  padding: 10px 14px 12px;
   margin-bottom: 10px;
-  overflow: hidden;
-  border: 0.5px solid var(--border);
+  transition: background .25s;
 }
+#zone-panel .zp-name   { font-size: 14px; font-weight: 600; color: var(--zp-name); margin-bottom: 4px; }
+#zone-panel .zp-reason { font-size: 12px; font-weight: 500; color: var(--zp-reason); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+#zone-panel .zp-desc   { font-size: 12px; color: var(--zp-desc); line-height: 1.5; }
+#zone-panel .zp-close  { float: right; font-size: 11px; color: var(--zp-close); cursor: pointer; margin-top: -2px; }
 
 /* ── Inputs ── */
 .loc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 .coord-group label { display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 3px; }
 .coord-group input {
-  font-size: 13px; padding: 7px 8px; width: 100%;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  border: 0.5px solid var(--border);
-  border-radius: 8px;
-  outline: none;
-  transition: background .2s, color .2s, border-color .2s;
+  font-size: 13px; padding: 8px; width: 100%;
+  border: 1px solid var(--input-border); border-radius: 8px;
+  background: var(--input-bg); color: var(--text-primary);
+  outline: none; transition: background .2s, color .2s, border-color .2s;
 }
 .coord-group input:focus { border-color: #60a5fa; }
 
 /* ── Buttons ── */
 .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
-button {
-  font-size: 13px; padding: 9px; cursor: pointer; width: 100%;
-  background: var(--btn-bg);
-  color: var(--btn-text);
-  border: 0.5px solid var(--btn-border);
-  border-radius: 8px;
-  transition: background .2s, color .2s;
-}
-button:hover { opacity: .85; }
+.btn-row button { font-size: 13px; padding: 10px; cursor: pointer; width: 100%; border: none; border-radius: 8px; font-weight: 500; }
+.btn-gps   { background: #1a1a2e; color: #fff; }
+.btn-check { background: #1565c0; color: #fff; }
 
-/* ── Status box ── */
-.status-box {
-  border-radius: 12px; padding: 1.25rem 1rem;
-  margin-bottom: 1rem; text-align: center;
-  border: 0.5px solid transparent;
-  transition: background .25s, border-color .25s;
-}
-.status-box.idle    { background: var(--idle-bg);    border-color: var(--idle-border); }
-.status-box.green   { background: var(--go-bg);      border-color: var(--go-border); }
-.status-box.yellow  { background: var(--caution-bg); border-color: var(--caution-border); }
-.status-box.red     { background: var(--nogo-bg);    border-color: var(--nogo-border); }
-
-.status-label { font-size: 28px; font-weight: 500; letter-spacing: .02em; }
+/* ── Status ── */
+.status-box { border-radius: 12px; padding: 1.25rem 1rem; margin-bottom: 1rem; text-align: center; border: 0.5px solid transparent; transition: background .25s, border-color .25s; }
+.status-box.idle   { background: var(--idle-bg);  border-color: var(--idle-border); }
+.status-box.green  { background: var(--go-bg);    border-color: var(--go-border); }
+.status-box.yellow { background: var(--ca-bg);    border-color: var(--ca-border); }
+.status-box.red    { background: var(--no-bg);    border-color: var(--no-border); }
+.status-label { font-size: 28px; font-weight: 700; letter-spacing: .02em; }
 .status-box.idle   .status-label { color: var(--idle-label); }
 .status-box.green  .status-label { color: var(--go-label); }
-.status-box.yellow .status-label { color: var(--caution-label); }
-.status-box.red    .status-label { color: var(--nogo-label); }
-
+.status-box.yellow .status-label { color: var(--ca-label); }
+.status-box.red    .status-label { color: var(--no-label); }
 .status-reason { font-size: 13px; margin-top: 4px; }
 .status-box.idle   .status-reason { color: var(--idle-reason); }
 .status-box.green  .status-reason { color: var(--go-reason); }
-.status-box.yellow .status-reason { color: var(--caution-reason); }
-.status-box.red    .status-reason { color: var(--nogo-reason); }
-
+.status-box.yellow .status-reason { color: var(--ca-reason); }
+.status-box.red    .status-reason { color: var(--no-reason); }
 .status-note { font-size: 11px; margin-top: 6px; color: var(--text-tertiary); }
 
 /* ── Cards ── */
-.card {
-  background: var(--bg-primary);
-  border: 0.5px solid var(--border);
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 10px;
-  transition: background .25s, border-color .25s;
-}
-.card-title {
-  font-size: 11px; font-weight: 500;
-  color: var(--text-secondary);
-  text-transform: uppercase; letter-spacing: .06em;
-  margin-bottom: 12px;
-}
-
-/* ── Metrics ── */
+.card { background: var(--bg-primary); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 10px; transition: background .25s; }
+.card-title { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
 .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.metric {
-  background: var(--bg-secondary);
-  border-radius: 8px; padding: 10px 12px;
-  transition: background .25s;
-}
+.metric { background: var(--bg-secondary); border-radius: 8px; padding: 10px 12px; }
 .metric-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 2px; }
-.metric-value { font-size: 22px; font-weight: 500; color: var(--text-primary); line-height: 1.1; }
+.metric-value { font-size: 22px; font-weight: 600; color: var(--text-primary); line-height: 1.1; }
 .metric-unit  { font-size: 12px; font-weight: 400; color: var(--text-secondary); }
 .metric-sub   { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; }
-
-/* ── Zones ── */
-.zone-item { padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+.zone-item { padding: 8px 0; border-bottom: 0.5px solid var(--border-light); }
 .zone-item:last-child { border-bottom: none; padding-bottom: 0; }
 .zone-name   { font-size: 13px; font-weight: 500; color: var(--text-primary); }
 .zone-detail { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 .clear-msg   { font-size: 14px; color: var(--clear-color); padding: 4px 0; }
 
-/* ── DABS buttons ── */
-.dabs-btn {
-  display: block; text-align: center;
-  padding: 10px 12px; font-size: 13px; font-weight: 500;
-  color: #fff; background: #1565c0;
-  border-radius: 8px; text-decoration: none;
-  margin-bottom: 8px; cursor: pointer; border: none;
-}
-.dabs-btn:last-of-type { background: #0277bd; margin-bottom: 0; }
+/* ── DABS ── */
+.dabs-btn { display: block; text-align: center; padding: 11px 12px; font-size: 13px; font-weight: 600; color: #fff; background: #1565c0; border-radius: 8px; text-decoration: none; margin-bottom: 8px; }
+.dabs-btn.tomorrow { background: #0277bd; margin-bottom: 0; }
 
 /* ── Misc ── */
-.timestamp  { font-size: 11px; color: var(--text-tertiary); margin-top: 10px; }
-.msg  { font-size: 13px; color: var(--text-secondary); }
-.err  { font-size: 13px; color: var(--nogo-label); }
-/* ── Leaflet dark mode overrides ── */
-[data-theme="dark"] .leaflet-control-zoom a {
-  background: #1e293b;
-  color: #e2e8f0;
-  border-color: #334155;
-}
+.timestamp { font-size: 11px; color: var(--text-tertiary); margin-top: 10px; }
+.msg { font-size: 13px; color: var(--text-secondary); }
+.err { font-size: 13px; color: var(--no-label); }
+.disclaimer { font-size: 11px; color: var(--text-tertiary); text-align: center; margin-top: 1rem; line-height: 1.6; padding-bottom: 2rem; }
+
+/* ── Leaflet dark overrides ── */
+[data-theme="dark"] .leaflet-control-zoom a { background: #1e293b; color: #e2e8f0; border-color: #334155; }
 [data-theme="dark"] .leaflet-control-zoom a:hover { background: #334155; }
 [data-theme="dark"] .leaflet-bar { border-color: #334155 !important; box-shadow: none; }
-[data-theme="dark"] .leaflet-control-attribution {
-  background: rgba(15,23,42,.85);
-  color: #64748b;
-}
+[data-theme="dark"] .leaflet-control-attribution { background: rgba(15,23,42,.85); color: #64748b; }
 [data-theme="dark"] .leaflet-control-attribution a { color: #94a3b8; }
-
-.disclaimer {
-  font-size: 11px; color: var(--text-tertiary);
-  text-align: center; margin-top: 1rem;
-  line-height: 1.6; padding-bottom: 1rem;
-}
 </style>
 </head>
 <body>
@@ -244,12 +191,18 @@ button:hover { opacity: .85; }
     </div>
     <div class="header-text">
       <h1>HelvetiDrone</h1>
-      <p>Personal pre-flight reference &mdash; not a compliance tool</p>
+      <p>Swiss Drone Pre-flight All-In-One App &mdash; Vibecoded by Eddie</p>
     </div>
     <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
   </div>
 
   <div id="map"></div>
+  <div id="zone-panel">
+    <span class="zp-close" onclick="document.getElementById('zone-panel').style.display='none'">✕ close</span>
+    <div class="zp-name"   id="zp-name"></div>
+    <div class="zp-reason" id="zp-reason"></div>
+    <div class="zp-desc"   id="zp-desc"></div>
+  </div>
 
   <div class="loc-row">
     <div class="coord-group">
@@ -262,8 +215,8 @@ button:hover { opacity: .85; }
     </div>
   </div>
   <div class="btn-row">
-    <button onclick="useGPS()">Use my location</button>
-    <button onclick="runChecks()">Check this location</button>
+    <button class="btn-gps"   onclick="useGPS()">&#x2316; My location</button>
+    <button class="btn-check" onclick="runChecks()">Check location</button>
   </div>
 
   <div class="status-box idle" id="status-box">
@@ -283,34 +236,60 @@ button:hover { opacity: .85; }
 
   <div class="card">
     <div class="card-title">DABS &mdash; Daily Airspace Bulletin</div>
-    <a class="dabs-btn" href="https://www.skybriefing.com/o/dabs?today"     target="_blank">Open today's DABS on Skybriefing</a>
-    <a class="dabs-btn" href="https://www.skybriefing.com/o/dabs?tomorrow"  target="_blank">Open tomorrow's DABS on Skybriefing</a>
-    <p class="timestamp">Source: skybriefing.com &mdash; always verify manually before flying</p>
+    <a class="dabs-btn"          href="https://www.skybriefing.com/o/dabs?today"    target="_blank">Today's DABS &rarr; Skybriefing</a>
+    <a class="dabs-btn tomorrow" href="https://www.skybriefing.com/o/dabs?tomorrow" target="_blank">Tomorrow's DABS &rarr; Skybriefing</a>
+    <p class="timestamp">Always verify manually before flying. Things change.</p>
   </div>
 
-  <p class="disclaimer">Weather: MeteoSwiss ICON via Open-Meteo &middot; Airspace: geo.admin.ch (BAZL)<br>This tool does not replace your legal obligation to check official sources.</p>
+  <p class="disclaimer">Weather: MeteoSwiss ICON via Open-Meteo &middot; Airspace: geo.admin.ch (BAZL)<br>Do confirm with official sources.</p>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-let wx = null, zones = null, map = null, marker = null, tileLayer = null;
+// ── PWA Manifest injection ──────────────────────────────────
+(function injectManifest() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 192; canvas.height = 192;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#1a1a2e';
+  ctx.beginPath(); ctx.roundRect(0,0,192,192,32); ctx.fill();
+  [[24,24],[168,24],[24,168],[168,168]].forEach(([x,y]) => {
+    ctx.beginPath(); ctx.arc(x,y,18,0,Math.PI*2);
+    ctx.fillStyle='#60a5fa'; ctx.fill();
+  });
+  ctx.beginPath(); ctx.arc(96,96,22,0,Math.PI*2);
+  ctx.fillStyle='#fff'; ctx.fill();
+  [[[40,40],[76,76]],[[152,40],[116,76]],[[40,152],[76,116]],[[152,152],[116,116]]].forEach(([[x1,y1],[x2,y2]])=>{
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+    ctx.strokeStyle='#60a5fa'; ctx.lineWidth=10; ctx.stroke();
+  });
+  const icon = canvas.toDataURL('image/png');
+  const manifest = {
+    name:'HelvetiDrone', short_name:'HelvetiDrone',
+    description:'Personal pre-flight reference for Swiss drone pilots',
+    start_url:'.', display:'standalone',
+    background_color:'#f5f5f5', theme_color:'#1a1a2e',
+    icons:[{src:icon,sizes:'192x192',type:'image/png',purpose:'any maskable'}]
+  };
+  const blob = new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+  const lnk = document.createElement('link');
+  lnk.rel='manifest'; lnk.href=URL.createObjectURL(blob);
+  document.head.appendChild(lnk);
+  const al = document.createElement('link');
+  al.rel='apple-touch-icon'; al.href=icon;
+  document.head.appendChild(al);
+})();
 
-const TILES = {
-  light: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attr: '&copy; OpenStreetMap'
-  },
-  dark: {
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    attr: '&copy; OpenStreetMap &copy; CARTO'
-  }
-};
-
-/* ── Theme ── */
+// ── Theme ──────────────────────────────────────────────────
 const html = document.documentElement;
 const themeBtn = document.getElementById('theme-btn');
+let tileLayer = null;
 
-// Honour system preference on first load
+const TILES = {
+  light: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  dark:  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+};
+
 if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
   html.dataset.theme = 'dark';
   themeBtn.textContent = '☀️';
@@ -321,27 +300,35 @@ function toggleTheme() {
   html.dataset.theme = dark ? 'light' : 'dark';
   themeBtn.textContent = dark ? '🌙' : '☀️';
   swapTiles(dark ? 'light' : 'dark');
+  redrawZones(); // re-draw polygons with correct dark/light colours
 }
 
 function swapTiles(mode) {
   if (!map) return;
   if (tileLayer) map.removeLayer(tileLayer);
-  const t = TILES[mode];
-  tileLayer = L.tileLayer(t.url, { maxZoom: 18 }).addTo(map);
+  tileLayer = L.tileLayer(TILES[mode], { maxZoom:18 }).addTo(map);
 }
 
-/* ── Map ── */
+// ── Map ──────────────────────────────────────────────────────
+let wx=null, zones=null, map=null, marker=null, zoneLayers=[];
+
 function initMap(la, lo) {
   const mode = html.dataset.theme === 'dark' ? 'dark' : 'light';
   if (!map) {
-    map = L.map('map', { zoomControl: true, attributionControl: false }).setView([la, lo], 13);
-    const t = TILES[mode];
-    tileLayer = L.tileLayer(t.url, { maxZoom: 18 }).addTo(map);
-    L.control.attribution({ prefix: '&copy; OpenStreetMap' }).addTo(map);
-    marker = L.marker([la, lo]).addTo(map);
+    map = L.map('map',{zoomControl:true,attributionControl:false}).setView([la,lo],13);
+    tileLayer = L.tileLayer(TILES[mode],{maxZoom:18}).addTo(map);
+    L.control.attribution({prefix:'&copy; OpenStreetMap'}).addTo(map);
+    marker = L.marker([la,lo]).addTo(map);
+    map.on('click', e => {
+      const {lat,lng} = e.latlng;
+      document.getElementById('inp-lat').value = lat.toFixed(4);
+      document.getElementById('inp-lon').value = lng.toFixed(4);
+      marker.setLatLng([lat,lng]);
+      runChecks();
+    });
   } else {
-    map.setView([la, lo], 13);
-    marker.setLatLng([la, lo]);
+    map.setView([la,lo],13);
+    marker.setLatLng([la,lo]);
   }
 }
 
@@ -359,113 +346,141 @@ function useGPS() {
     p => {
       document.getElementById('inp-lat').value = p.coords.latitude.toFixed(4);
       document.getElementById('inp-lon').value = p.coords.longitude.toFixed(4);
-      updateMapPin();
-      runChecks();
+      updateMapPin(); runChecks();
     },
     () => alert('Could not get GPS. Enter coordinates manually.')
   );
 }
 
-/* ── Checks ── */
-function runChecks() {
-  wx = null; zones = null;
-  setStatus('idle', '&mdash;', 'Loading&hellip;');
-  loadWeather();
-  loadAirspace();
-}
-
 function lat() { return parseFloat(document.getElementById('inp-lat').value); }
 function lon() { return parseFloat(document.getElementById('inp-lon').value); }
-function nowTime() { return new Date().toLocaleTimeString('en-CH', { hour: '2-digit', minute: '2-digit' }); }
-function degToCompass(d) { return ['N','NE','E','SE','S','SW','W','NW'][Math.round(d / 45) % 8]; }
+function nowTime() { return new Date().toLocaleTimeString('en-CH',{hour:'2-digit',minute:'2-digit'}); }
+function degToCompass(d) { return ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8]; }
+
+function polyColors() {
+  return html.dataset.theme === 'dark'
+    ? { color:'#f87171', fillColor:'#7f1d1d', fillOpacity:.45, weight:2 }
+    : { color:'#c62828', fillColor:'#ef9a9a', fillOpacity:.35, weight:2 };
+}
+
+function redrawZones() {
+  if (!zones || !map) return;
+  zoneLayers.forEach(l => map.removeLayer(l));
+  zoneLayers = [];
+  drawZonePolygons(zones);
+}
+
+function drawZonePolygons(zoneList) {
+  zoneList.forEach(r => {
+    const geo = r.geometry, a = r.attributes;
+    const name        = a.zone_name_en || a.bezeichnung || a.name || 'Restriction zone';
+    const reason      = (a.zone_reason_id || '').replace(/_/g,' ');
+    const restriction = a.zone_restriction_id || '';
+    const desc        = a.zone_restriction_en || a.einschraenkung || a.beschreibung || '';
+    if (geo && geo.rings) {
+      geo.rings.forEach(ring => {
+        const latlngs = ring.map(([x,y]) => [y,x]);
+        const poly = L.polygon(latlngs, polyColors()).addTo(map).on('click', e => {
+          L.DomEvent.stopPropagation(e);
+          document.getElementById('zp-name').textContent   = name;
+          document.getElementById('zp-reason').textContent = [reason,restriction].filter(Boolean).join(' · ');
+          document.getElementById('zp-desc').textContent   = desc;
+          document.getElementById('zone-panel').style.display = 'block';
+        });
+        zoneLayers.push(poly);
+      });
+    }
+  });
+}
+
+function runChecks() {
+  wx=null; zones=null;
+  zoneLayers.forEach(l => map.removeLayer(l));
+  zoneLayers=[];
+  document.getElementById('zone-panel').style.display='none';
+  setStatus('idle','&mdash;','Loading&hellip;');
+  loadWeather(); loadAirspace();
+}
 
 async function loadWeather() {
   const card = document.getElementById('weather-card');
   card.innerHTML = '<div class="card-title">Weather</div><div class="msg">Loading&hellip;</div>';
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat()}&longitude=${lon()}&hourly=windspeed_10m,winddirection_10m,windgusts_10m,precipitation_probability&windspeed_unit=kmh&models=icon_seamless&forecast_days=1&timezone=Europe%2FZurich`;
-    const d = await (await fetch(url)).json();
-    const h = new Date().getHours();
-    const idx = Math.max(0, d.hourly.time.findIndex(t => parseInt(t.slice(11, 13)) === h));
-    const wind  = Math.round(d.hourly.windspeed_10m[idx]);
-    const gusts = Math.round(d.hourly.windgusts_10m[idx]);
-    const dir   = Math.round(d.hourly.winddirection_10m[idx]);
-    const rain  = Math.round(d.hourly.precipitation_probability[idx]);
-    wx = { wind, gusts, rain };
-    card.innerHTML = `
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat()}&longitude=${lon()}&hourly=windspeed_10m,winddirection_10m,windgusts_10m,precipitation_probability&windspeed_unit=kmh&models=icon_seamless&forecast_days=1&timezone=Europe%2FZurich`;
+    const d=await (await fetch(url)).json();
+    const h=new Date().getHours();
+    const idx=Math.max(0,d.hourly.time.findIndex(t=>parseInt(t.slice(11,13))===h));
+    const wind=Math.round(d.hourly.windspeed_10m[idx]);
+    const gusts=Math.round(d.hourly.windgusts_10m[idx]);
+    const dir=Math.round(d.hourly.winddirection_10m[idx]);
+    const rain=Math.round(d.hourly.precipitation_probability[idx]);
+    wx={wind,gusts,rain};
+    card.innerHTML=`
       <div class="card-title">Weather</div>
       <div class="metric-grid">
-        <div class="metric">
-          <div class="metric-label">Wind</div>
-          <div class="metric-value">${wind} <span class="metric-unit">km/h</span></div>
-          <div class="metric-sub">${degToCompass(dir)}</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Gusts</div>
-          <div class="metric-value">${gusts} <span class="metric-unit">km/h</span></div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Rain chance</div>
-          <div class="metric-value">${rain}<span class="metric-unit">%</span></div>
-        </div>
+        <div class="metric"><div class="metric-label">Wind</div><div class="metric-value">${wind} <span class="metric-unit">km/h</span></div><div class="metric-sub">${degToCompass(dir)}</div></div>
+        <div class="metric"><div class="metric-label">Gusts</div><div class="metric-value">${gusts} <span class="metric-unit">km/h</span></div></div>
+        <div class="metric"><div class="metric-label">Rain chance</div><div class="metric-value">${rain}<span class="metric-unit">%</span></div></div>
       </div>
-      <p class="timestamp">Source: MeteoSwiss ICON via Open-Meteo &middot; ${nowTime()}</p>`;
+      <p class="timestamp">MeteoSwiss ICON via Open-Meteo &middot; ${nowTime()}</p>`;
     tryStatus();
   } catch(e) {
-    card.innerHTML = '<div class="card-title">Weather</div><div class="err">Failed to load weather. Check your connection.</div>';
+    card.innerHTML='<div class="card-title">Weather</div><div class="err">Failed to load weather. Check your connection.</div>';
   }
 }
 
 async function loadAirspace() {
-  const card = document.getElementById('airspace-card');
-  card.innerHTML = '<div class="card-title">Airspace &mdash; 5km radius</div><div class="msg">Loading&hellip;</div>';
+  const card=document.getElementById('airspace-card');
+  card.innerHTML='<div class="card-title">Airspace &mdash; 5km radius</div><div class="msg">Loading&hellip;</div>';
   try {
-    const d = 0.05, la = lat(), lo = lon();
-    const url = `https://api3.geo.admin.ch/rest/services/api/MapServer/identify?geometry=${lo},${la}&geometryType=esriGeometryPoint&layers=all:ch.bazl.einschraenkungen-drohnen&mapExtent=${lo-d},${la-d},${lo+d},${la+d}&imageDisplay=1000,1000,96&tolerance=150&sr=4326&lang=en`;
-    const data = await (await fetch(url)).json();
-    zones = data.results || [];
-    if (zones.length === 0) {
-      card.innerHTML = `<div class="card-title">Airspace &mdash; 5km radius</div><div class="clear-msg">No restrictions found at this location</div><p class="timestamp">Source: geo.admin.ch (BAZL) &middot; ${nowTime()}</p>`;
+    const d=0.05,la=lat(),lo=lon();
+    const url=`https://api3.geo.admin.ch/rest/services/api/MapServer/identify?geometry=${lo},${la}&geometryType=esriGeometryPoint&layers=all:ch.bazl.einschraenkungen-drohnen&mapExtent=${lo-d},${la-d},${lo+d},${la+d}&imageDisplay=1000,1000,96&tolerance=150&sr=4326&lang=en`;
+    const data=await (await fetch(url)).json();
+    zones=data.results||[];
+    drawZonePolygons(zones);
+    if(zoneLayers.length>0) map.fitBounds(L.featureGroup(zoneLayers).getBounds().pad(.2));
+    if(zones.length===0){
+      card.innerHTML=`<div class="card-title">Airspace &mdash; 5km radius</div><div class="clear-msg">No restrictions found at this location</div><p class="timestamp">geo.admin.ch (BAZL) &middot; ${nowTime()}</p>`;
     } else {
-      const items = zones.map(r => {
-        const a = r.attributes;
-        const name   = a.bezeichnung || a.name || a.layerBodId || 'Restriction zone';
-        const detail = a.einschraenkung || a.restriction || a.beschreibung || '';
-        return `<div class="zone-item"><div class="zone-name">${name}</div>${detail ? `<div class="zone-detail">${detail}</div>` : ''}</div>`;
+      const items=zones.map(r=>{
+        const a=r.attributes;
+        const name=a.bezeichnung||a.name||a.layerBodId||'Restriction zone';
+        const detail=a.einschraenkung||a.restriction||a.beschreibung||'';
+        return `<div class="zone-item"><div class="zone-name">${name}</div>${detail?`<div class="zone-detail">${detail}</div>`:''}</div>`;
       }).join('');
-      card.innerHTML = `<div class="card-title">Airspace &mdash; 5km radius</div>${items}<p class="timestamp">Source: geo.admin.ch (BAZL) &middot; ${nowTime()}</p>`;
+      card.innerHTML=`<div class="card-title">Airspace &mdash; 5km radius</div>${items}<p class="timestamp">geo.admin.ch (BAZL) &middot; ${nowTime()}</p>`;
     }
     tryStatus();
   } catch(e) {
-    card.innerHTML = '<div class="card-title">Airspace &mdash; 5km radius</div><div class="err">Failed to load airspace data. Check your connection.</div>';
+    card.innerHTML='<div class="card-title">Airspace &mdash; 5km radius</div><div class="err">Failed to load airspace data. Check your connection.</div>';
   }
 }
 
 function tryStatus() {
-  if (!wx || zones === null) return;
-  const { wind, gusts, rain } = wx;
-  const restricted = zones.length > 0;
-  let cls = 'green', label = 'GO', reason = 'All clear for this location';
-  if (wind > 40 || gusts > 50 || rain > 60 || restricted) {
-    cls = 'red'; label = 'NO-GO';
-    if (restricted)  reason = zones.length + ' airspace restriction(s) at this location';
-    else if (wind > 40)  reason = 'Wind too high: ' + wind + ' km/h';
-    else if (gusts > 50) reason = 'Gusts too high: ' + gusts + ' km/h';
-    else reason = 'High rain probability: ' + rain + '%';
-  } else if (wind > 25 || gusts > 35 || rain > 30) {
-    cls = 'yellow'; label = 'CAUTION';
-    if (wind > 25)   reason = 'Wind elevated: ' + wind + ' km/h';
-    else if (gusts > 35) reason = 'Gusts elevated: ' + gusts + ' km/h';
-    else reason = 'Rain possible: ' + rain + '%';
+  if(!wx||zones===null) return;
+  const{wind,gusts,rain}=wx;
+  const restricted=zones.length>0;
+  let cls='green',label='GO',reason='All clear for this location';
+  if(wind>40||gusts>50||rain>60||restricted){
+    cls='red';label='NO-GO';
+    if(restricted) reason=zones.length+' airspace restriction(s) at this location';
+    else if(wind>40) reason='Wind too high: '+wind+' km/h';
+    else if(gusts>50) reason='Gusts too high: '+gusts+' km/h';
+    else reason='High rain probability: '+rain+'%';
+  } else if(wind>25||gusts>35||rain>30){
+    cls='yellow';label='CAUTION';
+    if(wind>25) reason='Wind elevated: '+wind+' km/h';
+    else if(gusts>35) reason='Gusts elevated: '+gusts+' km/h';
+    else reason='Rain possible: '+rain+'%';
   }
-  setStatus(cls, label, reason);
+  setStatus(cls,label,reason);
 }
 
-function setStatus(cls, label, reason) {
-  const box = document.getElementById('status-box');
-  box.className = 'status-box ' + cls;
-  box.innerHTML = `<div class="status-label">${label}</div><div class="status-reason">${reason}</div><div class="status-note">Always check DABS and official sources before flying</div>`;
+function setStatus(cls,label,reason){
+  const box=document.getElementById('status-box');
+  box.className='status-box '+cls;
+  box.innerHTML=`<div class="status-label">${label}</div><div class="status-reason">${reason}</div><div class="status-note">Always check DABS and official sources before flying</div>`;
 }
 </script>
 </body>
-</html>
+    </html>
