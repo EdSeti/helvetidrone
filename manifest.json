@@ -1,0 +1,16 @@
+{
+  "name": "HelvetiDrone",
+  "short_name": "HelvetiDrone",
+  "description": "Swiss drone pre-flight tool",
+  "start_url": "/helvetidrone/",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#1a1a2e",
+  "icons": [
+    {
+      "src": "https://edseti.github.io/helvetidrone/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
